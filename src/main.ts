@@ -20,8 +20,25 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
 
-  // Global prefix for all API routes
-  app.setGlobalPrefix('api/v1');
+  // Global prefix for all API routes (except root /)
+  app.setGlobalPrefix('api/v1', {
+    exclude: ['/'],
+  });
+
+  // Root endpoint for Render / Cloud health check
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.get('/', (req: any, res: any) => {
+    res.json({
+      status: 'ok',
+      service: 'vfc-ai-diagnose',
+      docs: '/api/docs',
+      health: '/api/v1/health',
+      timestamp: new Date().toISOString(),
+    });
+  });
+  expressApp.head('/', (req: any, res: any) => {
+    res.status(200).end();
+  });
 
   // Swagger OpenAPI documentation
   const config = new DocumentBuilder()
@@ -38,7 +55,7 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   console.log(`🚀 API server running at http://localhost:${port}`);
   console.log(`📚 Swagger docs available at http://localhost:${port}/api/docs`);
 }
