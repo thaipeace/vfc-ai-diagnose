@@ -28,6 +28,7 @@ import { HealthModule } from './modules/health/health.module';
 
     // Redis connection for BullMQ
     BullModule.forRootAsync({
+      imports: [ConfigModule],
       useFactory: () => ({
         connection: getRedisConnectionOptions(),
       }),
