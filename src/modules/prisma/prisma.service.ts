@@ -11,7 +11,12 @@ export class PrismaService
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
-    const connectionString = process.env.DATABASE_URL;
+    let connectionString = process.env.DATABASE_URL;
+    if (connectionString && !connectionString.includes('uselibpqcompat=true')) {
+      const separator = connectionString.includes('?') ? '&' : '?';
+      connectionString = `${connectionString}${separator}uselibpqcompat=true`;
+    }
+
     const pool = new Pool({
       connectionString,
       ssl: connectionString?.includes('neon.tech')
