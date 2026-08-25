@@ -21,6 +21,7 @@ export class DiagnosisService {
     base64ImagesSmall: string[],
     cropType?: string,
   ) {
+    this.logger.log(`[DiagnosisService] Creating diagnosis record for user ${userId}`);
     const diagnosis = await this.prisma.plantDiagnosis.create({
       data: {
         userId,
@@ -30,12 +31,14 @@ export class DiagnosisService {
       },
     });
 
+    this.logger.log(`[DiagnosisService] Created diagnosis ${diagnosis.id}. Adding job to BullMQ queue...`);
     await this.diagnosisQueue.add('process', {
       diagnosisId: diagnosis.id,
       base64Images,
       base64ImagesSmall,
       cropType,
     });
+    this.logger.log(`[DiagnosisService] Enqueued job successfully for diagnosis ${diagnosis.id}`);
 
     return { id: diagnosis.id, status: 'PENDING' };
   }
