@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ═══════════════════════════════════════════
+// Bảng microservice SỞ HỮU (đọc + ghi)
+// ═══════════════════════════════════════════
+
+model PlantDiagnosis {
+  id            String                @id @default(cuid())
+  userId        String
+  imageUrls     String[]
+  cropType      String?
+  rawAiResponse Json?
+  summary       String?
+  confidence    Float?
+  status        DiagnosisStatus       @default(PROCESSING)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  suggestions   DiagnosisSuggestion[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("plant_diagnoses")
+}
+
+model DiagnosisSuggestion {
+  id          String         @id @default(cuid())
+  diagnosisId String
+  productId   String?
+  reason      String?
+  rank        Int            @default(1)
+  createdAt   DateTime       @default(now())
+  diagnosis   PlantDiagnosis @relation(fields: [diagnosisId], references: [id], onDelete: Cascade)
+  product     Product?       @relation(fields: [productId], references: [id])
+
+  @@map("diagnosis_suggestions")
+}
+
+model PlanStageDisease {
+  id              String   @id @default(cuid())
+  cropType        String   @map("crop_type")
+  growthStage     String   @map("growth_stage")
+  pestDisease     String   @map("pest_disease")
+  detail          String
+  severityLevel   String   @map("severity_level")
+  imageUrls       String[] @map("image_urls")
+  description     String
+  vfcSolution     String   @map("vfc_solution")
+  actionThreshold String   @map("action_threshold")
+  pestDensity     String   @map("pest_density")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([cropType, growthStage])
+  @@index([cropType, growthStage, pestDisease])
+  @@index([cropType, growthStage, pestDisease, severityLevel])
+  @@map("plan_stage_diseases")
+}
+
+// ═══════════════════════════════════════════
+// Bảng microservice CHỈ ĐỌC (không ghi)
+// ═══════════════════════════════════════════
+
+model Product {
+  id          String                @id @default(cuid())
+  name        String
+  slug        String                @default("")
+  imageUrls   String[]              @default([])
+  isActive    Boolean               @default(true)
+  suggestions DiagnosisSuggestion[]
+
+  @@map("products")
+}
+
+model Crop {
+  id       String  @id @default(cuid())
+  name     String
+  isActive Boolean @default(true) @map("is_active")
+
+  @@map("crops")
+}
+
+enum DiagnosisStatus {
+  PROCESSING
+  DONE
+  FAILED
+}
