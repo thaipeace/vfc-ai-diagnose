@@ -17,6 +17,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // Silently handle browser favicon request
+    if (request.url === '/favicon.ico') {
+      return response.status(HttpStatus.NO_CONTENT).end();
+    }
+
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -29,10 +34,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
           ? exception.message
           : 'Internal server error';
 
-    this.logger.error(
-      `HTTP ${status} [${request.method}] ${request.url}`,
-      exception instanceof Error ? exception.stack : JSON.stringify(exception),
-    );
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.error(
+        `HTTP ${status} [${request.method}] ${request.url}`,
+        exception instanceof Error ? exception.stack : JSON.stringify(exception),
+      );
+    } else {
+      this.logger.warn(
+        `HTTP ${status} [${request.method}] ${request.url} - ${typeof message === 'object' ? JSON.stringify(message) : message}`,
+      );
+    }
 
     response.status(status).json({
       statusCode: status,
