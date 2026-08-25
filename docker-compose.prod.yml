@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Redis cho Queue BullMQ
+  redis:
+    image: redis:7-alpine
+    container_name: vfc-redis
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # NestJS API Server
+  ai-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vfc-ai-api
+    restart: always
+    ports:
+      - "127.0.0.1:3001:3001"
+    env_file:
+      - .env.production
+    depends_on:
+      - redis
+
+  # NestJS Background Worker
+  ai-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vfc-ai-worker
+    restart: always
+    command: ["node", "dist/worker.js"]
+    env_file:
+      - .env.production
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
