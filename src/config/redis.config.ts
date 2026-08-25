@@ -13,14 +13,14 @@ export const getRedisConnectionOptions = (): RedisOptions => {
       tls: isTls
         ? {
             rejectUnauthorized: false,
+            servername: url.hostname,
           }
         : undefined,
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
       keepAlive: 10000,
-      connectTimeout: 30000,
-      family: 4,
-      retryStrategy: (times) => Math.min(times * 500, 3000),
+      connectTimeout: 20000,
+      retryStrategy: (times) => Math.min(times * 200, 2000),
       reconnectOnError: (err) => {
         const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
         return targetErrors.some((e) => err.message.includes(e));
@@ -33,6 +33,6 @@ export const getRedisConnectionOptions = (): RedisOptions => {
     port: parseInt(process.env.REDIS_PORT || '6379', 10),
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    retryStrategy: (times) => Math.min(times * 500, 3000),
+    retryStrategy: (times) => Math.min(times * 200, 2000),
   };
 };
