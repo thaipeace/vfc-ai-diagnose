@@ -6,6 +6,18 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
+// Suppress transient socket reset logs from Upstash Redis idle connection drops
+process.on('uncaughtException', (err: any) => {
+  if (
+    err?.code === 'ECONNRESET' ||
+    err?.message?.includes('ECONNRESET') ||
+    err?.syscall === 'read'
+  ) {
+    return;
+  }
+  console.error('[UncaughtException]', err);
+});
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 

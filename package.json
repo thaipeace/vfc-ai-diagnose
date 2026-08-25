@@ -15,7 +15,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "start:worker": "node dist/worker.js",
-    "start:prod:all": "node dist/worker.js & node dist/main.js",
+    "start:prod:all": "node dist/main.js",
     "prisma:generate": "npx prisma generate",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
