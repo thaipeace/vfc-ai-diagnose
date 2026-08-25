@@ -1,12 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Increase payload limit for base64 images
+  app.use(json({ limit: '25mb' }));
+  app.use(urlencoded({ extended: true, limit: '25mb' }));
 
   // Use Pino logger
   app.useLogger(app.get(Logger));
@@ -21,7 +26,9 @@ async function bootstrap() {
   // Swagger OpenAPI documentation
   const config = new DocumentBuilder()
     .setTitle('VFC AI Diagnosis Microservice')
-    .setDescription('Microservice API for plant disease detection and product recommendations')
+    .setDescription(
+      'Microservice API for plant disease detection and product recommendations',
+    )
     .setVersion('1.0')
     .addTag('diagnoses')
     .addTag('health')
