@@ -85,6 +85,14 @@ model Crop {
   @@map("crops")
 }
 
+model SystemConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_configs")
+}
+
 enum DiagnosisStatus {
   PROCESSING
   DONE

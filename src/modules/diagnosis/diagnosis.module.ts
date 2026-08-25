@@ -3,9 +3,13 @@ import { BullModule } from '@nestjs/bullmq';
 import { DiagnosisController } from './diagnosis.controller';
 import { DiagnosisService } from './diagnosis.service';
 import { DiagnosisProcessor } from './diagnosis.processor';
+import { ImageModule } from '../image/image.module';
+import { AIModule } from '../ai/ai.module';
 
 @Module({
   imports: [
+    ImageModule,
+    AIModule,
     BullModule.registerQueue({
       name: 'diagnosis',
       defaultJobOptions: {

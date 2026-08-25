@@ -6,29 +6,21 @@ export interface DiagnosisInput {
   promptText: string; // Câu hỏi gửi cho AI
 }
 
-/** Dữ liệu gửi cho AI để validate ảnh */
-export interface ImageValidationInput {
-  base64Images: string[]; // Ảnh nhỏ 256×256 để validate nhanh
-  cropType?: string;
-  allowedStages: string[]; // Giai đoạn hợp lệ: ["Mạ", "Đẻ nhánh", ...]
-  allowedPestDiseases: string[]; // Dịch hại hợp lệ
-  allowedSeverityLevels: string[]; // Mức độ hợp lệ: ["Nhẹ", "Trung bình", "Nặng"]
-}
-
 /** Ảnh tham khảo từ bảng PlanStageDisease */
 export interface ReferenceData {
   text: string; // Mô tả bệnh, giải pháp VFC
-  base64Image?: string; // Ảnh minh họa (nếu có)
+  base64Image?: string | null; // Ảnh minh họa (nếu có)
 }
 
-/** Kết quả AI trả về (đã validate bằng Zod) */
+/** Kết quả AI trả về */
 export interface DiagnosisResult {
-  disease: string;
-  severity: string;
-  summary: string;
-  confidence: number;
+  disease?: string;
+  severity?: string;
+  summary?: string;
+  confidence?: number;
   vfcSolutionText?: string;
   solutionSets?: { name: string; products: string[] }[];
+  suggestedProducts?: string[];
   reasons?: Record<string, string>;
   provider?: string; // "gemini" hoặc "openrouter"
   fallbackFrom?: string; // Provider đầu tiên bị lỗi (nếu có)
