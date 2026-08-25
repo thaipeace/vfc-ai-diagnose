@@ -21,6 +21,10 @@ export const getRedisConnectionOptions = (): RedisOptions => {
       connectTimeout: 30000,
       family: 4,
       retryStrategy: (times) => Math.min(times * 500, 3000),
+      reconnectOnError: (err) => {
+        const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT'];
+        return targetErrors.some((e) => err.message.includes(e));
+      },
     };
   }
 

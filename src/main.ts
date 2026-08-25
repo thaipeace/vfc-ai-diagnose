@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
-// Suppress transient socket reset logs from Upstash Redis idle connection drops
+// Suppress transient socket reset logs from Upstash Redis / Neon DB idle connection drops
 process.on('uncaughtException', (err: any) => {
   if (
     err?.code === 'ECONNRESET' ||
@@ -16,6 +16,17 @@ process.on('uncaughtException', (err: any) => {
     return;
   }
   console.error('[UncaughtException]', err);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  if (
+    reason?.code === 'ECONNRESET' ||
+    reason?.message?.includes('ECONNRESET') ||
+    reason?.syscall === 'read'
+  ) {
+    return;
+  }
+  console.error('[UnhandledRejection]', reason);
 });
 
 async function bootstrap() {
