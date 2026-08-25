@@ -44,7 +44,7 @@ export class DiagnosisService {
    * Lấy diagnosis theo ID
    */
   async getById(id: string) {
-    return this.prisma.plantDiagnosis.findUnique({
+    const diagnosis = await this.prisma.plantDiagnosis.findUnique({
       where: { id },
       include: {
         suggestions: {
@@ -55,6 +55,29 @@ export class DiagnosisService {
         },
       },
     });
+
+    if (!diagnosis) return null;
+
+    const raw = diagnosis.rawAiResponse as any;
+    if (raw?.awaitingStage) {
+      return {
+        ...diagnosis,
+        status: 'AWAITING_STAGE',
+        awaitingStage: true,
+        availableStages: raw.availableStages ?? [],
+        detectedGrowthStage: raw.detectedGrowthStage ?? null,
+      };
+    }
+
+    if (raw?.reasonCode === 'WRONG_CROP') {
+      return {
+        ...diagnosis,
+        wrongCrop: true,
+        plantInfo: raw.plantInfo ?? null,
+      };
+    }
+
+    return diagnosis;
   }
 
   /**
