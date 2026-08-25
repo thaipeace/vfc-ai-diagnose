@@ -31,14 +31,28 @@ export class DiagnosisService {
       },
     });
 
-    this.logger.log(`[DiagnosisService] Created diagnosis ${diagnosis.id}. Adding job to BullMQ queue...`);
-    await this.diagnosisQueue.add('process', {
-      diagnosisId: diagnosis.id,
-      base64Images,
-      base64ImagesSmall,
-      cropType,
-    });
-    this.logger.log(`[DiagnosisService] Enqueued job successfully for diagnosis ${diagnosis.id}`);
+    this.logger.log(
+      `[DiagnosisService] Created diagnosis ${diagnosis.id}. Dispatching to BullMQ queue...`,
+    );
+
+    // Dispatch job to queue (non-blocking for ultra-fast HTTP response)
+    this.diagnosisQueue
+      .add('process', {
+        diagnosisId: diagnosis.id,
+        base64Images,
+        base64ImagesSmall,
+        cropType,
+      })
+      .then((job) => {
+        this.logger.log(
+          `[DiagnosisService] Job ${job.id} enqueued for diagnosis ${diagnosis.id}`,
+        );
+      })
+      .catch((err) => {
+        this.logger.error(
+          `[DiagnosisService] Failed to enqueue job for ${diagnosis.id}: ${err.message}`,
+        );
+      });
 
     return { id: diagnosis.id, status: 'PENDING' };
   }
@@ -134,14 +148,25 @@ export class DiagnosisService {
       },
     });
 
-    await this.diagnosisQueue.add('process-with-stage', {
-      diagnosisId: id,
-      base64Images,
-      cropType: diagnosis.cropType,
-      growthStage,
-      detectedPestDisease: raw?.detectedPestDisease,
-      detectedSeverityLevel: raw?.detectedSeverityLevel,
-    });
+    this.diagnosisQueue
+      .add('process-with-stage', {
+        diagnosisId: id,
+        base64Images,
+        cropType: diagnosis.cropType,
+        growthStage,
+        detectedPestDisease: raw?.detectedPestDisease,
+        detectedSeverityLevel: raw?.detectedSeverityLevel,
+      })
+      .then((job) => {
+        this.logger.log(
+          `[DiagnosisService] Stage job ${job.id} enqueued for diagnosis ${id}`,
+        );
+      })
+      .catch((err) => {
+        this.logger.error(
+          `[DiagnosisService] Failed to enqueue stage job for ${id}: ${err.message}`,
+        );
+      });
 
     return this.getById(id);
   }
