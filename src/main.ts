@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
-// Suppress transient socket reset logs from Upstash Redis / Neon DB idle connection drops
+// Suppress transient socket reset logs from DB idle connection drops
 process.on('uncaughtException', (err: any) => {
   if (
     err?.code === 'ECONNRESET' ||
@@ -31,6 +31,12 @@ process.on('unhandledRejection', (reason: any) => {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  // Enable CORS
+  app.enableCors({
+    origin: true, // Allow requests from any frontend domain / Vercel
+    credentials: true,
+  });
 
   // Increase payload limit for base64 images
   app.use(json({ limit: '25mb' }));
