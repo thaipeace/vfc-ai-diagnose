@@ -27,7 +27,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
+    const resBody =
       exception instanceof HttpException
         ? exception.getResponse()
         : exception instanceof Error
@@ -41,15 +41,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     } else {
       this.logger.warn(
-        `HTTP ${status} [${request.method}] ${request.url} - ${typeof message === 'object' ? JSON.stringify(message) : message}`,
+        `HTTP ${status} [${request.method}] ${request.url} - ${
+          typeof resBody === 'object' ? JSON.stringify(resBody) : resBody
+        }`,
       );
     }
 
-    response.status(status).json({
+    if (typeof resBody === 'object' && resBody !== null) {
+      return response.status(status).json({
+        ...resBody,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+      });
+    }
+
+    return response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      error: typeof message === 'object' ? message : { message },
+      message: resBody,
     });
   }
 }

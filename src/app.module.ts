@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
 
 import { getRedisConnectionOptions } from './config/redis.config';
+import { SecurityModule } from './common/security/security.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { DiagnosisModule } from './modules/diagnosis/diagnosis.module';
 import { AIModule } from './modules/ai/ai.module';
@@ -33,6 +34,9 @@ import { HealthModule } from './modules/health/health.module';
         connection: getRedisConnectionOptions(),
       }),
     }),
+
+    // Core Security & Throttling Module
+    SecurityModule,
 
     // Business & Core Modules
     PrismaModule,

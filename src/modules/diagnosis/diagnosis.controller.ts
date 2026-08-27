@@ -16,12 +16,17 @@ import {
   ConfirmStageDto,
 } from './dto/create-diagnosis.dto';
 import { InternalAuthGuard } from '../../common/guards/internal-auth.guard';
+import { SecurityThrottlerGuard } from '../../common/security/security-throttler.guard';
 import { UserId } from '../../common/decorators/user-id.decorator';
 
 @ApiTags('diagnoses')
 @Controller('diagnoses')
-@UseGuards(InternalAuthGuard)
-@ApiHeader({ name: 'x-user-id', required: true, description: 'Authenticated user ID forwarded by BFF' })
+@UseGuards(InternalAuthGuard, SecurityThrottlerGuard)
+@ApiHeader({
+  name: 'x-user-id',
+  required: true,
+  description: 'Authenticated user ID forwarded by BFF',
+})
 export class DiagnosisController {
   constructor(private diagnosisService: DiagnosisService) {}
 
@@ -41,20 +46,16 @@ export class DiagnosisController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get diagnosis detail by ID (used for polling and viewing)' })
-  async getById(
-    @UserId() userId: string,
-    @Param('id') id: string,
-  ) {
+  @ApiOperation({
+    summary: 'Get diagnosis detail by ID (used for polling and viewing)',
+  })
+  async getById(@UserId() userId: string, @Param('id') id: string) {
     return this.diagnosisService.getById(id);
   }
 
   @Get()
   @ApiOperation({ summary: 'List diagnoses history for current user' })
-  async list(
-    @UserId() userId: string,
-    @Query('page') page: number = 1,
-  ) {
+  async list(@UserId() userId: string, @Query('page') page: number = 1) {
     return this.diagnosisService.getByUser(userId, Number(page) || 1);
   }
 
