@@ -45,9 +45,12 @@ export class SecurityThrottlerGuard implements CanActivate {
     const req = httpContext.getRequest<Request>();
     const res = httpContext.getResponse<Response>();
 
-    // 2. Trích xuất Client IP & User ID
+    // 2. Trích xuất Client IP & User ID (Safe parsing)
     const clientIp = this.getClientIp(req);
-    const userId = (req.headers['x-user-id'] as string) || req.body?.userId;
+    const rawUserId = req.headers['x-user-id'];
+    const userId = Array.isArray(rawUserId)
+      ? rawUserId[0]
+      : (rawUserId as string) || req.body?.userId;
 
     // Đọc custom throttle nếu có cấu hình riêng cho handler
     const customOptions =
