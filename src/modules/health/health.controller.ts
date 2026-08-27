@@ -2,10 +2,12 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../prisma/prisma.service';
 import { getRedisConnectionOptions } from '../../config/redis.config';
+import { SkipThrottle } from '../../common/security/security.decorators';
 import IORedis from 'ioredis';
 
 @ApiTags('health')
 @Controller('health')
+@SkipThrottle() // 👈 Miễn kiểm tra Rate Limit cho toàn bộ endpoint trong HealthController
 export class HealthController {
   constructor(private prisma: PrismaService) {}
 
