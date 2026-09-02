@@ -5,7 +5,6 @@ import { json, urlencoded } from 'express';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { GeoBlockGuard } from './common/guards/geo-block.guard';
 
 // Suppress transient socket reset logs from DB idle connection drops
 process.on('uncaughtException', (err: any) => {
@@ -46,10 +45,9 @@ async function bootstrap() {
   // Use Pino logger
   app.useLogger(app.get(Logger));
 
-  // Global exception filter, interceptor and GeoBlock guard
+  // Global exception filter and interceptor
   app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new LoggingInterceptor());
-  app.useGlobalGuards(new GeoBlockGuard());
 
   // Global prefix for all API routes (except root /)
   app.setGlobalPrefix('api/v1', {
