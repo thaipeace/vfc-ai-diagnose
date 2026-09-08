@@ -108,7 +108,7 @@ export class DiagnosisProcessor extends WorkerHost {
           data: {
             rawAiResponse: validationResult as unknown as Prisma.JsonObject,
             summary: validationResult.userGuidance,
-            status: DiagnosisStatus.DONE,
+            status: DiagnosisStatus.FAILED,
           },
         });
 

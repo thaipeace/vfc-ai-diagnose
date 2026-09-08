@@ -94,6 +94,14 @@ export class DiagnosisService {
       };
     }
 
+    if (raw?.isValid === false || diagnosis.status === 'FAILED') {
+      return {
+        ...diagnosis,
+        status: 'FAILED',
+        summary: raw?.userGuidance || diagnosis.summary,
+      };
+    }
+
     return diagnosis;
   }
 
