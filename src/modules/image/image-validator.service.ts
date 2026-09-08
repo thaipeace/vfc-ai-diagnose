@@ -27,7 +27,7 @@ const INVALID_IMAGE_GUIDANCE: Record<
   WRONG_CROP:
     'Ảnh chụp có vẻ không phải là cây trồng. Vui lòng kiểm tra lại loại cây bạn đã chọn.',
   BLURRY_IMAGE:
-    'Ảnh chụp bị mờ hoặc quá xa. Bạn vui lòng đưa camera lại gần vết bệnh trên cây (khoảng 20-30cm), giữ chắc tay và chụp lại nơi có đủ ánh sáng nhé.',
+    'Ảnh chụp bị mờ hoặc chưa thể hiện rõ đặc điểm nhận diện của cây (như toàn bộ phiến lá, đọt non, hoa hoặc quả). Bạn vui lòng lùi camera ra một chút để lấy trọn vẹn đặc điểm cây, hoặc chụp lại ở nơi đủ ánh sáng nhé.',
 };
 
 @Injectable()
@@ -63,18 +63,25 @@ Hãy phân tích bức ảnh về mặt chi tiết vết bệnh và trả về m
   "isValid": true hoặc false,
   "reasonCode": "VALID" | "NOT_A_PLANT" | "WRONG_CROP" | "BLURRY_IMAGE",
   "userGuidance": "Chuỗi tiếng Việt hướng dẫn nông dân chụp lại nếu isValid là false, hoặc chuỗi trống nếu true",
+  "cropConfidence": 0.0 đến 1.0 (mức độ tin cậy khi nhận diện loại cây trong ảnh),
   "detectedGrowthStage": "tên giai đoạn hoặc null",
   "detectedPestDisease": "loại dịch hại hoặc null",
   "detectedSeverityLevel": "mức độ bệnh hoặc null",
-  "plantInfo": "Chuỗi tiếng Việt mô tả chi tiết về cây thực tế trong ảnh (khi WRONG_CROP), hoặc null"
+  "plantInfo": "Chuỗi tiếng Việt mô tả ngắn gọn về cây thực tế trong ảnh (khi WRONG_CROP và cropConfidence >= 0.9), hoặc null"
 }
+
+Quy tắc đánh giá cropConfidence:
+- Chỉ trả cropConfidence >= 0.9 khi nhìn thấy rõ ít nhất 2 đặc điểm nhận diện đặc trưng của cây (hình thái phiến lá đầy đủ, cấu trúc thân/nhánh, hoa, quả, hoặc đọt non).
+- Nếu ảnh chỉ thấy một phần lá, chỉ có đốm bệnh, hoặc không thấy được đặc điểm nhận diện đáng tin cậy, trả cropConfidence thấp (< 0.9).
+
 ${stagesInfo}
 ${pestDiseasesInfo}
 ${severityInfo}
 
-Nếu ảnh không chứa cây trồng, bộ phận của cây (lá, thân, rễ): isValid = false, reasonCode = "NOT_A_PLANT", userGuidance = "Hệ thống không nhận diện được cây trồng trong ảnh. Vui lòng chụp rõ phần lá hoặc thân cây bị bệnh.", detectedGrowthStage = null, plantInfo = null
-Nếu ảnh là cây khác hoàn toàn so với target_crop: isValid = false, reasonCode = "WRONG_CROP", userGuidance = "Thông tin dịch hại trên cây trồng bạn đưa không chính xác.", detectedGrowthStage = null, plantInfo = "Viết bằng tiếng Việt với giọng văn chuyên nghiệp, trọng thị như một chuyên gia nông nghiệp tư vấn cho nông dân. Trình bày thành từng phần rõ ràng, mỗi phần trên một dòng riêng theo format sau:\\n🌿 Tên cây: <tên cây thực tế nhận diện được, ghi cả tên khoa học nếu biết>\\n🔍 Tình trạng hiện tại: <mô tả tình trạng sức khỏe của cây trong ảnh — khỏe mạnh, có dấu hiệu bệnh, thiếu dinh dưỡng, v.v.>\\n💡 Công dụng: <công dụng phổ biến của loại cây này trong nông nghiệp, đời sống>\\n🌍 Môi trường thích hợp: <khí hậu, đất đai, điều kiện ánh sáng phù hợp>\\n🌱 Gợi ý canh tác: <phương pháp trồng, chăm sóc, phòng bệnh cơ bản nếu biết>\\nNếu không chắc chắn phần nào thì bỏ qua phần đó, không bịa thông tin."
-Nếu ảnh quá mờ, quá tối, quá sáng, chụp quá xa: isValid = false, reasonCode = "BLURRY_IMAGE", userGuidance = "Ảnh chụp không rõ chi tiết vết bệnh. Bạn vui lòng đưa camera lại gần vết bệnh trên cây (khoảng 20-30cm), giữ chắc tay và chụp lại rõ vết bệnh nhé.", detectedGrowthStage = null, plantInfo = null
+Nếu ảnh không chứa cây trồng, bộ phận của cây (lá, thân, rễ): isValid = false, reasonCode = "NOT_A_PLANT", userGuidance = "Hệ thống không nhận diện được cây trồng trong ảnh. Vui lòng chụp rõ phần lá hoặc thân cây bị bệnh.", cropConfidence = 0.0, detectedGrowthStage = null, plantInfo = null
+Nếu ảnh là cây khác so với target_crop VÀ cropConfidence >= 0.9 (chắc chắn nhận diện được cây): isValid = false, reasonCode = "WRONG_CROP", userGuidance = "Thông tin dịch hại trên cây trồng bạn đưa không chính xác.", detectedGrowthStage = null, plantInfo = "Viết bằng tiếng Việt, ngắn gọn và thực dụng theo format sau, mỗi mục trên một dòng riêng:\\n🌿 Cây nhận diện: <tên cây tiếng Việt>\\n🔍 Tình trạng ghi nhận: <tóm tắt ngắn gọn tình trạng sức khỏe quan sát được trên lá/thân trong ảnh — khỏe mạnh, có dấu hiệu sâu bệnh, vàng lá, cháy bìa lá, v.v.>\\n💡 Hướng xử lý tiếp theo: <nếu là cây phổ biến tại VN: gợi ý chọn lại danh mục cây phù hợp để nhận phác đồ VFC; nếu cây khác: gợi ý biện pháp canh tác cơ bản và liên hệ kỹ sư nông nghiệp VFC để được tư vấn>\\nKhông bịa thông tin. Chỉ ghi những gì quan sát được từ ảnh."
+Nếu ảnh là cây khác so với target_crop NHƯNG cropConfidence < 0.9 (không chắc chắn): isValid = false, reasonCode = "BLURRY_IMAGE", userGuidance = "Ảnh chụp chưa thể hiện rõ đặc điểm nhận diện của cây. Bạn vui lòng lùi camera ra một chút để lấy trọn vẹn đặc điểm cây, hoặc chụp lại ở nơi đủ ánh sáng nhé.", detectedGrowthStage = null, plantInfo = null
+Nếu ảnh quá mờ, quá tối, quá sáng, chụp quá xa hoặc không thấy rõ đặc điểm nhận diện cây: isValid = false, reasonCode = "BLURRY_IMAGE", userGuidance = "Ảnh chụp bị mờ hoặc chưa thể hiện rõ đặc điểm nhận diện của cây. Bạn vui lòng lùi camera ra một chút để lấy trọn vẹn đặc điểm cây, hoặc chụp lại ở nơi đủ ánh sáng nhé.", cropConfidence = 0.0, detectedGrowthStage = null, plantInfo = null
 Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonCode = "VALID", userGuidance = "", plantInfo = null`;
   }
 
@@ -90,6 +97,7 @@ Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonC
         detectedGrowthStage?: string | null;
         detectedPestDisease?: string | null;
         detectedSeverityLevel?: string | null;
+        cropConfidence?: number | null;
       }
     >;
 
@@ -175,6 +183,26 @@ Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonC
       };
     }
 
+    // Safety net: WRONG_CROP nhưng không đủ tin cậy → chuyển thành BLURRY_IMAGE
+    if (parsed.reasonCode === 'WRONG_CROP') {
+      const confidence =
+        typeof parsed.cropConfidence === 'number' ? parsed.cropConfidence : 0;
+      if (confidence < 0.9 || !parsed.plantInfo?.trim()) {
+        this.logger.warn(
+          `WRONG_CROP with low confidence (${confidence}) or missing plantInfo — fallback to BLURRY_IMAGE`,
+        );
+        return {
+          isValid: false,
+          reasonCode: 'BLURRY_IMAGE',
+          userGuidance: INVALID_IMAGE_GUIDANCE.BLURRY_IMAGE,
+          detectedGrowthStage: null,
+          detectedPestDisease: null,
+          detectedSeverityLevel: null,
+          plantInfo: null,
+        };
+      }
+    }
+
     const fallbackGuidance =
       parsed.reasonCode === 'WRONG_CROP'
         ? INVALID_IMAGE_GUIDANCE.WRONG_CROP.replace(
@@ -185,6 +213,7 @@ Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonC
           ? INVALID_IMAGE_GUIDANCE.NOT_A_PLANT
           : INVALID_IMAGE_GUIDANCE.BLURRY_IMAGE;
 
+    // Extract plantInfo for WRONG_CROP — AI trả mô tả ngắn gọn cây thực tế
     const plantInfo =
       parsed.reasonCode === 'WRONG_CROP' && typeof parsed.plantInfo === 'string'
         ? parsed.plantInfo.trim() || null

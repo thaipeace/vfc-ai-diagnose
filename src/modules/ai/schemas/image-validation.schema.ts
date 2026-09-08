@@ -15,6 +15,7 @@ export const ImageValidationSchema = z.object({
   isValid: z.boolean(),
   reasonCode: ImageValidationReasonCodeEnum,
   userGuidance: z.string(),
+  cropConfidence: z.number().nullable().optional(),
   detectedGrowthStage: z.string().nullable().optional(),
   detectedPestDisease: z.string().nullable().optional(),
   detectedSeverityLevel: z.string().nullable().optional(),
