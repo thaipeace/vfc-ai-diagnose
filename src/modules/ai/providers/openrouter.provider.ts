@@ -38,7 +38,7 @@ export class OpenRouterProvider implements AIProvider {
       });
     }
 
-    content.push({ type: 'text', text: '\n\nDữ liệu bệnh tham khảo của VFC:' });
+    content.push({ type: 'text', text: '\n\nDanh mục bệnh và giải pháp tham khảo:' });
     for (const ref of input.referenceData) {
       content.push({ type: 'text', text: '\n' + ref.text });
       if (ref.base64Image) {

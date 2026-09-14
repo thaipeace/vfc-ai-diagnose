@@ -42,7 +42,7 @@ export class GeminiProvider implements AIProvider {
       parts.push({ inlineData: { data: b64, mimeType: 'image/jpeg' } });
     }
 
-    parts.push({ text: '\n\nDữ liệu bệnh tham khảo của VFC:' });
+    parts.push({ text: '\n\nDanh mục bệnh và giải pháp tham khảo:' });
     for (const ref of input.referenceData) {
       parts.push({ text: '\n' + ref.text });
       if (ref.base64Image) {

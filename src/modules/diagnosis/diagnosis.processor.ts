@@ -241,7 +241,7 @@ export class DiagnosisProcessor extends WorkerHost {
         if (d.imageUrls && d.imageUrls.length > 0) {
           b64 = await this.imageService.fetchAndOptimize(d.imageUrls[0]);
         }
-        const text = `- Bệnh: ${d.detail} (${d.pestDisease})\n- Mức độ: ${d.severityLevel}\n- Mô tả: ${d.description}\n- Giải pháp VFC: ${d.vfcSolution}`;
+        const text = `- Bệnh: ${d.detail} (${d.pestDisease})\n- Mức độ: ${d.severityLevel}\n- Mô tả: ${d.description}\n- Giải pháp điều trị: ${d.vfcSolution}`;
         referenceData.push({ text, base64Image: b64 });
       }
 
