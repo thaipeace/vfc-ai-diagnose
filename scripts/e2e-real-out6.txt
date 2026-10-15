@@ -1,0 +1,40 @@
+
+> vfc-ai-diagnose@0.0.1 e2e:retrieval
+> ts-node scripts/e2e-retrieval-diagnose.ts --mode real
+
+Ảnh thật trong C:\projects\vfc\deseases: 6
+
+━━ lua-anh-sau.jpg  [Lúa]  kỳ vọng: sâu
+   Top bệnh theo độ giống: Cháy bìa lá vi khuẩn 0.941 | Rầy phấn trắng 0.939 | Khô vằn 0.929 | thối thân 0.926 | Muỗi hành 0.924 | Đạo ôn cổ bông 0.922 | Sâu cuốn lá 0.920 | lép vàng 0.915
+   Bệnh kỳ vọng nằm ở hạng: 7
+   Gemini: "Sâu cuốn lá" | mức: Trung bình | tin cậy: 0.9 | thuốc: Solo 350SC
+   → ✓ ĐÚNG
+
+━━ lua-benh-hoa-cuc.jpg  [Lúa]  kỳ vọng: (không rõ)
+   Top bệnh theo độ giống: Đạo ôn cổ bông 0.908 | Lem lép hạt 0.901 | lép vàng 0.891 | thối thân 0.883 | Sâu cuốn lá 0.865 | Lúa cỏ 0.865 | Khô vằn 0.863 | Sâu đục thân 0.862
+   Gemini: "Triệu chứng u mốc màu cam trên hạt lúa" | mức: Trung bình | tin cậy: 0.45 | thuốc: (không)
+
+━━ lua-dao-on-nhe-1.jpg  [Lúa]  kỳ vọng: đạo ôn
+   Top bệnh theo độ giống: Đạo ôn lá 0.926 | Đạo ôn cổ bông 0.923 | Sâu cuốn lá 0.922 | Muỗi hành 0.902 | Khô vằn 0.893 | Rầy phấn trắng 0.888 | Sâu đục thân 0.885 | thối thân 0.882
+   Bệnh kỳ vọng nằm ở hạng: 1
+   Gemini: "Bệnh đạo ôn lá" | mức: Trung bình | tin cậy: 0.9 | thuốc: Blastogan 75WP
+   → ✓ ĐÚNG
+
+━━ sau-rieng-ray-xanh-ray-phan-trang.jpg  [Sầu riêng]  kỳ vọng: rầy
+   Top bệnh theo độ giống: Rầy xanh 0.991 | Rầy nhảy 0.956 | Bọ trĩ 0.938 | Rệp vảy 0.933 | Nhện đỏ 0.930 | Rong, Tảo 0.928 | Cháy lá thán thư 0.923 | Cháy lá do Rhizoctonia 0.920
+   Bệnh kỳ vọng nằm ở hạng: 1
+   Gemini: "Rầy xanh" | mức: Nhẹ | tin cậy: 0.95 | thuốc: Incipio 100DC, Selecron, Opal
+   → ✓ ĐÚNG
+
+━━ sau-rieng-rong-tao-2.jpg  [Sầu riêng]  kỳ vọng: rong / tảo
+   Top bệnh theo độ giống: Rong, Tảo 0.981 | Cháy lá thán thư 0.947 | Rầy xanh 0.932 | Rệp vảy 0.929 | Bọ trĩ 0.928 | Cháy lá do Rhizoctonia 0.927 | Rầy nhảy 0.923 | Nhện đỏ 0.921
+   Bệnh kỳ vọng nằm ở hạng: 1
+   Gemini: "Bệnh đốm rong" | mức: Trung bình | tin cậy: 0.9 | thuốc: Champion 57.6DP, Xantocin 40WG, Champion
+   → ✓ ĐÚNG
+
+━━ sau-rieng-rong-tao.png  [Sầu riêng]  kỳ vọng: rong / tảo
+   Top bệnh theo độ giống: Rong, Tảo 0.981 | Cháy lá thán thư 0.943 | Rệp vảy 0.941 | Rầy xanh 0.941 | Rầy nhảy 0.940 | Ngộ độc phèn + nhôm 0.935 | Chết ngược 0.934 | Nhện đỏ 0.933
+   Bệnh kỳ vọng nằm ở hạng: 1
+   Gemini: "Bệnh rong, tảo" | mức: Trung bình | tin cậy: 0.9 | thuốc: Champion 57.6DP, Xantocin 40WG
+   → ✓ ĐÚNG
+

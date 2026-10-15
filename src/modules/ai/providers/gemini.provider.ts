@@ -28,7 +28,7 @@ export class GeminiProvider implements AIProvider {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const modelName =
-      this.config.get<string>('GEMINI_MODEL') || 'gemini-2.5-flash';
+      this.config.get<string>('GEMINI_MODEL') || 'gemini-3.5-flash';
     const model = genAI.getGenerativeModel({
       model: modelName,
       generationConfig: { temperature: 0.1 },
@@ -55,7 +55,7 @@ export class GeminiProvider implements AIProvider {
     parts.push({ text: `\n\n${input.promptText}` });
 
     this.logger.log(`Sending diagnosis request to Gemini API (${modelName})...`);
-    const result = await model.generateContent(parts);
+    const result = await this.generateWithRetry(model, parts);
     const text = result.response.text();
     this.logger.log(
       `Gemini response received. Text length: ${text.length}`,
@@ -68,6 +68,27 @@ export class GeminiProvider implements AIProvider {
       ...validated,
       provider: 'gemini',
     };
+  }
+
+  /** Retry ngắn cho lỗi tạm thời (503 quá tải, lỗi mạng). 429 không retry vì thường là hết quota ngày. */
+  private async generateWithRetry(
+    model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>,
+    parts: GeminiContentPart[],
+  ) {
+    const delays = [1500, 4000];
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await model.generateContent(parts);
+      } catch (err: any) {
+        const msg = String(err?.message ?? '');
+        const transient = /\b503\b|fetch failed|ECONNRESET|ETIMEDOUT/i.test(msg);
+        if (!transient || attempt >= delays.length) throw err;
+        this.logger.warn(
+          `Gemini lỗi tạm thời, thử lại lần ${attempt + 1}/${delays.length}: ${msg.slice(0, 120)}`,
+        );
+        await new Promise((r) => setTimeout(r, delays[attempt]));
+      }
+    }
   }
 
   async healthCheck(): Promise<boolean> {

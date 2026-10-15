@@ -8,7 +8,12 @@ export class ImageService {
   /**
    * Tải ảnh tham khảo từ URL (Google Drive, Cloud...) + resize nhỏ lại (256x256, q=60) để gửi cho AI.
    */
-  async fetchAndOptimize(rawUrl: string): Promise<string | null> {
+  async fetchAndOptimize(
+    rawUrl: string,
+    options: { size?: number; quality?: number } = {},
+  ): Promise<string | null> {
+    const size = options.size ?? 256;
+    const quality = options.quality ?? 60;
     try {
       let url = rawUrl
         .trim()
@@ -38,8 +43,8 @@ export class ImageService {
 
       const arrayBuffer = await res.arrayBuffer();
       const buffer = await sharp(Buffer.from(arrayBuffer))
-        .resize(256, 256, { fit: 'inside', withoutEnlargement: true })
-        .jpeg({ quality: 60 })
+        .resize(size, size, { fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality })
         .toBuffer();
 
       return buffer.toString('base64');

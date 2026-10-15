@@ -1,0 +1,43 @@
+[31m[Nest] 16188  - [39m15/10/2026, 14:54:44 [31m  ERROR[39m [38;5;3m[AIRouterService] [39m[31m[AI Fallback] Gemini failed, switching to OpenRouter: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.[39m
+Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+    at handleResponseNotOk (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:434:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async makeRequest (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:403:9)
+    at async generateContent (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:867:22)
+    at async GeminiProvider.diagnose (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\providers\gemini.provider.ts:58:20)
+    at async AIRouterService.executeFallback (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\ai-router.service.ts:62:22)
+[31m[Nest] 16188  - [39m15/10/2026, 14:55:00 [31m  ERROR[39m [38;5;3m[AIRouterService] [39m[31m[AI Fallback] Gemini failed, switching to OpenRouter: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: fetch failed[39m
+TypeError: fetch failed
+    at node:internal/deps/undici/undici:13510:13
+    at async makeRequest (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:397:20)
+    at async generateContent (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:867:22)
+    at async GeminiProvider.diagnose (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\providers\gemini.provider.ts:58:20)
+    at async AIRouterService.executeFallback (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\ai-router.service.ts:62:22)
+[31m[Nest] 16188  - [39m15/10/2026, 14:55:04 [31m  ERROR[39m [38;5;3m[AIRouterService] [39m[31m[AI Fallback] Gemini failed, switching to OpenRouter: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash
+Please retry in 16h4m55.543722758s. [{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Learn more about Gemini API quotas","url":"https://ai.google.dev/gemini-api/docs/rate-limits"}]},{"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[{"quotaMetric":"generativelanguage.googleapis.com/generate_content_free_tier_requests","quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier","quotaDimensions":{"location":"global","model":"gemini-3.8-flash"},"quotaValue":"20"}]},{"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"57895s"}][39m
+Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. 
+* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash
+Please retry in 16h4m55.543722758s. [{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Learn more about Gemini API quotas","url":"https://ai.google.dev/gemini-api/docs/rate-limits"}]},{"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[{"quotaMetric":"generativelanguage.googleapis.com/generate_content_free_tier_requests","quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier","quotaDimensions":{"location":"global","model":"gemini-3.8-flash"},"quotaValue":"20"}]},{"@type":"type.googleapis.com/google.rpc.RetryInfo","retryDelay":"57895s"}]
+    at handleResponseNotOk (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:434:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async makeRequest (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:403:9)
+    at async generateContent (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:867:22)
+    at async GeminiProvider.diagnose (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\providers\gemini.provider.ts:58:20)
+    at async AIRouterService.executeFallback (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\ai-router.service.ts:62:22)
+[31m[Nest] 16188  - [39m15/10/2026, 14:55:26 [31m  ERROR[39m [38;5;3m[AIRouterService] [39m[31m[AI Fallback] Gemini failed, switching to OpenRouter: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.[39m
+Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+    at handleResponseNotOk (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:434:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async makeRequest (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:403:9)
+    at async generateContent (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:867:22)
+    at async GeminiProvider.diagnose (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\providers\gemini.provider.ts:58:20)
+    at async AIRouterService.executeFallback (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\ai-router.service.ts:62:22)
+[31m[Nest] 16188  - [39m15/10/2026, 14:55:29 [31m  ERROR[39m [38;5;3m[AIRouterService] [39m[31m[AI Fallback] Gemini failed, switching to OpenRouter: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.[39m
+Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.
+    at handleResponseNotOk (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:434:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async makeRequest (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:403:9)
+    at async generateContent (C:\projects\vfc\vfc-ai-diagnose\node_modules\@google\generative-ai\dist\index.js:867:22)
+    at async GeminiProvider.diagnose (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\providers\gemini.provider.ts:58:20)
+    at async AIRouterService.executeFallback (C:\projects\vfc\vfc-ai-diagnose\src\modules\ai\ai-router.service.ts:62:22)

@@ -276,7 +276,7 @@ Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonC
 
     const model =
       this.config.get<string>('OPENROUTER_VISION_MODEL') ||
-      'google/gemini-2.5-flash';
+      'google/gemini-3.5-flash';
 
     this.logger.log(`Calling OpenRouter Vision validation API (${model})...`);
 
@@ -292,7 +292,9 @@ Nếu ảnh hợp lệ và phù hợp với target_crop: isValid = true, reasonC
         model,
         messages: [{ role: 'user', content }],
         temperature: 0.1,
-        max_tokens: 512,
+        max_tokens: 2048,
+        response_format: { type: 'json_object' },
+        reasoning: { effort: 'low', exclude: true },
       }),
     });
 

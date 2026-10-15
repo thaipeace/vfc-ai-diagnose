@@ -58,6 +58,24 @@ export const getPreviewUrl = (url: string): string => {
  */
 export const parseJsonBlock = <T = any>(text: string): T => {
   const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  const jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
-  return JSON.parse(jsonStr) as T;
+  let jsonStr = jsonMatch ? jsonMatch[1].trim() : text.trim();
+  if (!jsonMatch) {
+    // Code fence mở nhưng không có dấu đóng: bỏ dòng mở đầu rồi parse phần còn lại
+    jsonStr = jsonStr.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  }
+  try {
+    return JSON.parse(jsonStr) as T;
+  } catch (err) {
+    // Model chèn lời dẫn quanh JSON: thử lấy khối từ '{' đầu đến '}' cuối
+    const start = jsonStr.indexOf('{');
+    const end = jsonStr.lastIndexOf('}');
+    if (start !== -1 && end > start) {
+      try {
+        return JSON.parse(jsonStr.slice(start, end + 1)) as T;
+      } catch {
+        /* dùng lỗi gốc bên dưới */
+      }
+    }
+    throw err;
+  }
 };

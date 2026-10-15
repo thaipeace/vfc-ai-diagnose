@@ -52,7 +52,7 @@ export class OpenRouterProvider implements AIProvider {
     content.push({ type: 'text', text: `\n\n${input.promptText}` });
 
     const model =
-      this.config.get<string>('OPENROUTER_MODEL') || 'google/gemini-2.5-flash';
+      this.config.get<string>('OPENROUTER_MODEL') || 'google/gemini-3.5-flash';
 
     this.logger.log(`Sending diagnosis request to OpenRouter (${model})...`);
 
@@ -68,7 +68,9 @@ export class OpenRouterProvider implements AIProvider {
         model,
         messages: [{ role: 'user', content }],
         temperature: 0.2,
-        max_tokens: 1024,
+        max_tokens: 4096,
+        response_format: { type: 'json_object' },
+        reasoning: { effort: 'low', exclude: true },
       }),
     });
 

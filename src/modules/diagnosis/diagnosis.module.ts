@@ -5,12 +5,14 @@ import { DiagnosisService } from './diagnosis.service';
 import { DiagnosisProcessor } from './diagnosis.processor';
 import { ImageModule } from '../image/image.module';
 import { AIModule } from '../ai/ai.module';
+import { EmbeddingModule } from '../embedding/embedding.module';
 import { GoogleDriveModule } from '../google-drive/google-drive.module';
 
 @Module({
   imports: [
     ImageModule,
     AIModule,
+    EmbeddingModule,
     GoogleDriveModule,
     BullModule.registerQueue({
       name: 'diagnosis',

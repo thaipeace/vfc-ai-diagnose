@@ -1,6 +1,6 @@
 export const aiConfig = () => ({
   geminiApiKey: process.env.GEMINI_API_KEY || '',
-  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-3.5-flash',
   openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
   openrouterApiValidationKey: process.env.OPENROUTER_API_VALIDATION_KEY || '',
   openrouterModel: process.env.OPENROUTER_MODEL || 'google/gemini-flash-1.5',

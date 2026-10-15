@@ -16,11 +16,9 @@ import { getCropOptionByType } from '../../config/crop-options';
 import { includesStr } from '../../common/utils/string';
 import { matchProductAdvanced } from '../../common/utils/product-matcher';
 import { ReferenceData } from '../ai/ai-provider.interface';
-import {
-  selectDiverseImages,
-  mapConcurrent,
-} from '../../common/utils/reference-sampler';
-import { aggregateDiseases } from '../../common/utils/disease-aggregator';
+import { aggregateDiseases, AggregatedDisease } from '../../common/utils/disease-aggregator';
+import { ReferenceRetrievalService } from '../embedding/reference-retrieval.service';
+import { buildLegacyReferenceData } from './legacy-reference.builder';
 
 @Processor('diagnosis')
 export class DiagnosisProcessor extends WorkerHost {
@@ -33,6 +31,7 @@ export class DiagnosisProcessor extends WorkerHost {
     private aiEngine: AIEngineService,
     private aiRouter: AIRouterService,
     private config: ConfigService,
+    private retrieval: ReferenceRetrievalService,
     @InjectQueue('google-drive-sync') private driveQueue: Queue,
   ) {
     super();
@@ -151,6 +150,19 @@ export class DiagnosisProcessor extends WorkerHost {
     }
   }
 
+  /** Luồng chọn tham chiếu cũ (Diversity Sampling theo thứ tự bệnh) — dùng làm dự phòng. */
+  private buildLegacyReferenceData(
+    diagnosisId: string,
+    aggregatedDiseases: AggregatedDisease[],
+  ): Promise<ReferenceData[]> {
+    return buildLegacyReferenceData(aggregatedDiseases, {
+      imageService: this.imageService,
+      config: this.config,
+      logger: this.logger,
+      diagnosisId,
+    });
+  }
+
   private async runDiagnosisPipeline(
     diagnosisId: string,
     base64Images: string[],
@@ -190,64 +202,42 @@ export class DiagnosisProcessor extends WorkerHost {
         `[Disease Aggregator] Diagnosis: ${diagnosisId} | Aggregated into ${aggregatedDiseases.length} unique diseases`,
       );
 
-      const maxRecords =
-        Number(
-          this.config.get('AI_MAX_REFERENCE_RECORDS') ??
-            this.config.get('maxReferenceRecords') ??
-            40,
-        ) || 40;
-      const maxImages =
-        Number(
-          this.config.get('AI_MAX_REFERENCE_IMAGES') ??
-            this.config.get('maxReferenceImages') ??
-            8,
-        ) || 8;
-      const concurrency =
-        Number(
-          this.config.get('AI_IMAGE_CONCURRENCY') ??
-            this.config.get('imageConcurrency') ??
-            3,
-        ) || 3;
+      // 3. Chọn ảnh/bệnh đối chứng: ưu tiên truy xuất theo độ giống thị giác (vector embedding);
+      //    nếu tắt hoặc không thực hiện được thì dùng luồng cũ (Diversity Sampling).
+      let referenceData: ReferenceData[];
+      let retrievalTrace: Record<string, unknown> | undefined;
 
-      const targetDiseases =
-        aggregatedDiseases.length > maxRecords
-          ? aggregatedDiseases.slice(0, maxRecords)
-          : aggregatedDiseases;
+      const vectorResult = this.retrieval.isEnabled()
+        ? await this.retrieval.retrieve({
+            diseases: aggregatedDiseases,
+            userImages: base64Images,
+            diagnosisId,
+          })
+        : null;
 
-      // 3. Chọn các mẫu ảnh đại diện bằng Diversity Sampling (Round-Robin)
-      const recordsToFetchImages = selectDiverseImages(targetDiseases, maxImages);
-
-      this.logger.log(
-        `[Diversity Sampling] Diagnosis: ${diagnosisId} | Selected ${recordsToFetchImages.length}/${targetDiseases.length} diverse reference images`,
-      );
-
-      // 4. Tải và resize ảnh song song có kiểm soát concurrency (mặc định 3 luồng)
-      const imageMap = new Map<string, string>();
-      await mapConcurrent(recordsToFetchImages, concurrency, async (record) => {
-        if (record.imageUrls && record.imageUrls.length > 0) {
-          const b64 = await this.imageService.fetchAndOptimize(
-            record.imageUrls[0],
-          );
-          if (b64) {
-            imageMap.set(record.id, b64);
-          }
+      if (vectorResult) {
+        referenceData = await this.retrieval.buildReferenceData(vectorResult);
+        retrievalTrace = {
+          mode: 'vector',
+          coverage: Number(vectorResult.coverage.toFixed(3)),
+          diseases: vectorResult.diseases.map((r) => ({
+            name: r.disease.detail,
+            score: Number(r.score.toFixed(4)),
+            images: r.images.length,
+          })),
+        };
+        this.logger.log(
+          `[Vector Retrieval] Diagnosis: ${diagnosisId} | Sent ${vectorResult.diseases.length} diseases, ${referenceData.filter((r) => r.base64Image).length} reference images`,
+        );
+      } else {
+        referenceData = await this.buildLegacyReferenceData(
+          diagnosisId,
+          aggregatedDiseases,
+        );
+        if (this.retrieval.isEnabled()) {
+          retrievalTrace = { mode: 'legacy-fallback' };
         }
-      });
-
-      // 5. Cấu trúc referenceData sạch sẽ, tinh gọn (~3.500 tokens)
-      const referenceData: ReferenceData[] = targetDiseases.map((d, index) => {
-        const b64 = imageMap.get(d.id) || null;
-        const hasImgNotice = b64
-          ? ' [CÓ ẢNH ĐỐI CHỨNG ĐÍNH KÈM BÊN DƯỚI]'
-          : ' [CHỈ THAM KHẢO MÔ TẢ TRIỆU CHỨNG VĂN BẢN]';
-        const pestNotice = d.pestDisease ? ` (${d.pestDisease})` : '';
-        const stagesNotice =
-          d.stagesCovered && d.stagesCovered.length > 0
-            ? `\n- Giai đoạn thường gặp: ${d.stagesCovered.join(', ')}`
-            : '';
-        const text = `[Mẫu tham chiếu #${index + 1}${hasImgNotice}]\n- Bệnh: ${d.detail}${pestNotice}${stagesNotice}\n- Triệu chứng nhận diện: ${d.description}\n- Giải pháp VFC:\n  ${d.vfcSolution}`;
-        return { text, base64Image: b64 };
-      });
+      }
 
       const promptText = this.aiEngine.buildPrompt(cropType, allowedStages);
 
@@ -285,6 +275,7 @@ export class DiagnosisProcessor extends WorkerHost {
       const finalAiResponse = {
         ...parsed,
         growthStage: parsed.growthStage || growthStage || null,
+        ...(retrievalTrace ? { referenceRetrieval: retrievalTrace } : {}),
       };
 
       await this.prisma.plantDiagnosis.update({
